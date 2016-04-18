@@ -1,0 +1,155 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../poi-datahost.html">
+
+<script src="../../bower_components/lodash/dist/lodash.min.js"><</script>
+<script src="../../bower_components/imagesloaded/imagesloaded.pkgd.min.js"><</script>
+
+
+<dom-module id="lab-lazyelement">
+    <template>
+        <style>
+            :host {
+                display: block;
+                word-break: break-all;
+            }
+            :host[hidden] .paper{
+                transform: translateY(50px);
+            }
+            p {
+                line-height: 1.75;
+                font-size: 14px;
+                border-top: 5px solid silver;
+            }
+            .paper {
+                transform: translateY(0px);
+                transition: all 1s ease-out;
+                padding: 20px;
+                @apply(--shadow-elevation-2dp);
+            }
+            .paper {
+                background-color: #fff;
+            }
+            iron-image {
+
+                float: left;
+                clear: left;
+                margin: 0 10px 10px 0;
+            }
+            .paper::after {
+                visibility: hidden;
+                display: block;
+                font-size: 0;
+                content: " ";
+                clear: both;
+                height: 0;
+            }
+            .paper > iron-image {
+                width: 100%;
+                height: 180px;
+                margin: 0 auto;
+            }
+            .paper {
+                /*transition: all 1s linear;*/
+            }
+            #spinner {
+                text-align: center;
+            }
+            paper-spinner {
+                --paper-spinner-stroke-width: 1px;
+            }
+        </style>
+        <div id="spinner" hidden="{{!hidden}}"><paper-spinner active></paper-spinner></div>
+        <div id="container" class="paper" hidden="{{hidden}}">
+            <iron-image class='image' src="[[data.thumb]]" sizing="cover"></iron-image>
+            <p><content></content></p>
+            <template is="dom-repeat" items="[[data.response]]" as="response" initial-count="1" >
+                <div>
+                    <iron-image class='image' src="[[response.thumb]]"></iron-image>
+                    <p>[[response.text]]</p>
+                </div>
+            </template>
+        </div>
+
+    </template>
+
+    <script>
+        (function() {
+            'use strict';
+
+            Polymer({
+                is: 'lab-lazyelement',
+
+                behaviors: [
+                    Polymer.IronResizableBehavior
+                ],
+                properties: {
+                    data: {
+                        type: Object,
+                        value: function() { return {}},
+                        notify: true,
+                        observer: '_ob'
+                    },
+                    hidden: {
+                        type: Boolean,
+                        value: true
+                    }
+                },
+                /**
+                 * Public
+                 * */
+
+                /**
+                 * Private
+                 * */
+                _ob: function(data) {
+                    if( this.data.length === 0 || this.data === null || data.text === undefined ) return;
+                    // var imgLoad = imagesLoaded( this.querySelector('.image') );
+                    // imgLoad.once( 'always', this.onAlways.bind(this) );
+                },
+                _loadedChanged: function(e) {
+                    if(e.detail.value === false) return;
+                    console.log( '_____ loaded');
+                },
+                onAlways: function( instance ) {
+                    this.set('hidden', false);
+                    this.async( function( ) {
+                        console.log('★★★all images are loaded★★★');
+                        this.fire('resize');
+                    }, 1);
+                },
+
+                /**
+                 * Live
+                 * */
+
+                attached: function() {
+                    console.log( '* Attached ');
+                },
+                dettached: function() {
+                    console.log( '* Die');
+                },
+                ready: function() {
+                    console.log( '* Ready ');
+                     var imgLoad = imagesLoaded( this.querySelector('.image') );
+                     imgLoad.once( 'always', this.onAlways.bind(this) );
+                }
+            });
+        })();
+    </script>
+</dom-module>

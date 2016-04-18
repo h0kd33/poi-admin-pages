@@ -1,0 +1,188 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+
+<link rel="import" href="bower_components/polymer/polymer.html">
+
+<!-- iron -->
+<link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="bower_components/iron-image/iron-image.html">
+<link rel="import" href="bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="bower_components/iron-autogrow-textarea/iron-autogrow-textarea.html">
+
+<!-- paper -->
+<link rel="import" href="bower_components/paper-button/paper-button.html">
+<link rel="import" href="bower_components/paper-toggle-button/paper-toggle-button.html">
+
+<link rel="import" href="bower_components/paper-item/paper-item.html">
+<link rel="import" href="bower_components/paper-menu/paper-menu.html">
+
+<link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
+
+<!-- neon -->
+<link rel="import" href="bower_components/neon-animation/neon-animatable-behavior.html">
+<link rel="import" href="bower_components/neon-animation/neon-animation.html">
+
+<!-- other -->
+<link rel="import" href="bower_components/juicy-html/juicy-html.html">
+<link rel="import" href="moe-article.html">
+
+
+<dom-module id="article-viewer">
+  <template>
+    <style include="iron-flex iron-flex-alignment iron-positioning">
+      :host {
+        @apply(--layout-vertical);
+        @apply(--layout-fit);
+        @apply(--paper-font-common-base);
+        color: #800000;
+        word-break: break-word;
+      }
+      #container {
+        @apply(--layout-scroll);
+        @apply(--layout-fit);
+        @apply(--layout-relative);
+        padding: 20px;
+      }
+
+      /* Editor Dialog */
+      #textEditor{
+        --paper-dialog: {
+          position: fixed;
+          width: auto;
+          max-width: 100%;
+          bottom: 0;
+          right: 0;
+          margin: 0px;
+          padding: 0px 9px 0px;
+          background: none;
+          box-shadow: none;
+        }
+      }
+      #textEditor > div {
+        background-color: #fff;
+        padding: 20px;
+        margin: 0;
+        box-shadow: @apply(--shadow-elevation-16dp);
+      }
+      #textEditor #editorTextarea {
+        max-height: 450px;
+        max-width: 100%;
+      }
+
+      /* Paper Style */
+
+      paper-button {
+        font-size: 13px;
+
+      }
+      paper-button iron-icon {
+        vertical-align: -5px;
+        padding-right: 5px;
+      }
+      paper-button.green {
+        background-color: var(--paper-green-300);
+        color: white;
+      }
+    </style>
+    <style is="custom-style">
+      paper-button iron-icon {
+        --iron-icon-height: 20px;
+        --iron-icon-width: 20px;
+      }
+    </style>
+
+    <!-- Container -->
+    <div id="container">
+      <template is="dom-repeat" id="list" items="[[data]]" as="item" index-as="index" initial-count="3" target-framerate="1000">
+          <moe-article data="[[item]]" 
+            on-open-article-editor="_openEditor">
+          </moe-article>
+      </template>
+      <!-- Utility Elements-->
+      <iron-scroll-threshold scroll-target="container" on-lower-threshold="loadMoreData" id="threshold"></iron-scroll-threshold>
+    </div>
+    <!-- Container -->
+
+    <!-- Popup Elements -->
+
+    <paper-dialog id="textEditor" exit-animation="fade-out-animation" entry-animation="slide-from-bottom-animation" no-cancel-on-outside-click>
+      <div class="layout vertical">
+        <h2 id="editorTitle">編輯<span id="editorSerial"></span></h2>
+        <form action="">
+          <iron-autogrow-textarea name="" id="editorTextarea" value="{{textEditorContent}}" rows="8">asdsad</iron-autogrow-textarea>
+        </form>
+        <div class="layout horizontal">
+          <paper-button dialog-dismiss><iron-icon icon="icons:close"></iron-icon>取消</paper-button>;
+          <paper-button dialog-confirm class="green" style="margin-left: auto ">儲存</paper-button>
+        </div>
+      </div>
+    </paper-dialog>
+
+
+    <!--/ Popup Elements -->
+
+  </template>
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'article-viewer',
+
+        behaviors: [
+          Polymer.NeonAnimatableBehavior
+        ],
+        properties: {
+          data: {
+            type: Array,
+            value: function(){ return [];}
+          },
+          dataStore: {
+            // for holddata
+            type: Array,
+            value: function(){ return [];}
+          },
+          animationConfig: {
+            type: Object,
+            value: function() {
+              return {
+                'entry': [{
+                  name: 'slide-from-left-animation',
+                  node: this
+                }],
+                'exit': [{
+                    name: 'fade-out-animation',
+                    node: this
+                }]
+              }
+            }
+          },
+          textEditorContent: {
+            type: String
+          }
+
+        },
+        loadMoreData: function() {
+          // load async stuff. e.g. XHR
+        },
+        _openEditor: function(e) {
+          this.$.textEditor.open();
+          this.$.editorSerial.innerText = ' #' + e.detail.data.serial;
+          this.textEditorContent = e.detail.data.text;
+        }
+      });
+    })();
+  </script>
+</dom-module>

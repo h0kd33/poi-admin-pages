@@ -1,0 +1,239 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!-- Polymer Elements -->
+<link rel="import" href="bower_components/polymer/polymer.html">
+  <!-- IRON -->
+<link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="bower_components/iron-ajax/iron-ajax.html">
+  <!-- PAPER -->
+<link rel="import" href="bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
+  <!-- NEON -->
+<link rel="import" href="bower_components/neon-animation/neon-animation.html">
+  <!-- CARBON -->
+<link rel="import" href="bower_components/carbon-route/carbon-route.html">
+<link rel="import" href="bower_components/carbon-route/carbon-location.html">
+
+<!-- Third party Elements -->
+<link rel="import" href="bower_components/iron-swipeable-pages/iron-swipeable-pages.html">
+
+<!-- Custom Elements -->
+<link rel="import" href="poi-datahost.html">
+<link rel="import" href="article-list.html">
+<link rel="import" href="article-viewer.html">
+<link rel="import" href="article-reader.html">
+<link rel="import" href="moe-album-viewer.html">
+
+<dom-module id="admin-column" >
+  <template>
+
+    <style include="iron-flex iron-flex-alignment iron-positioning" >
+
+      :host {
+        @apply(--layout-vertical);
+        @apply(--layout-fit);
+        background-color: #ffffee;
+        -webkit-user-select: none;
+      }
+      #twoColumn {
+      }
+      article-list {
+        position: relative;
+        margin-left: -450px;
+        width: 450px;
+        z-index: 10;
+      }
+    </style>
+    <!-- Route -->
+    <carbon-location route="{{route}}" use-hash-as-path></carbon-location>
+    <carbon-route route="{{route}}" pattern="/:pageName" data="{{routeData}}" tail="{{routeTail}}"></carbon-route>
+    <carbon-route route="{{routeTail}}" pattern="/:responseSerial" data="{{tailRouteData}}"></carbon-route>
+
+    <!-- AJAX -->
+    <poi-datahost id="datahost" data="{{data}}"></poi-datahost>
+
+    <!-- Main Content -->
+    <div id="twoColumn" class="layout horizontal flex relative" on-open-article-reader="_openArticleReader">
+
+      <article-list id="articleList" data="[[data]]" on-scroll-to="_onScrollTo"></article-list>
+      <div class="layout vertical flex">
+        <paper-tabs selected="{{routeData.pageName}}" attr-for-selected="name">
+          <paper-tab name="viewer">文章模式</paper-tab>
+          <paper-tab name="album">相簿</paper-tab>
+        </paper-tabs>
+        <iron-swipeable-pages
+                id="mainPages"
+                class="flex"
+                selected="{{routeData.pageName}}"
+                attr-for-selected="key"
+                on-track="_handlePageTrack"
+                edge-swipe-sensitivity="45"
+                no-cycle>
+          <!-- First Level -->
+          <article-viewer id="articleViewer" key="viewer" data="[[data]]"></article-viewer>
+          <moe-album-viewer id="albumViewer" key="album" data="[[data]]"></moe-album-viewer>
+          <!-- Tail -->
+          <neon-animated-pages class="flex" id="readerPages" key="reader" selected="{{tailRouteData.responseSerial}}"
+                               attr-for-selected="key">
+            <article-reader id="articleReader" key="articleReader" on-tap="togglepage"></article-reader>
+            <article-reader id="pushReader" key="pushReader" on-tap="togglepage"></article-reader>
+          </neon-animated-pages>
+        </iron-swipeable-pages>
+      </div>
+    </div>
+
+    <template is="dom-if" if="{{loading}}">
+      <paper-spinner active="{{loading}}"></paper-spinner>
+    </template>
+
+  </template>
+  <script>
+
+
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'admin-column',
+
+        properties: {
+          data: {
+            type: Array,
+            value: function () {
+              return [];
+            }
+          },
+          // Motion
+          drawerOpen: {
+            // Open or Close
+            type: Boolean,
+            value: false
+          },
+          drawerEnableTrack: {
+            // enable track touch event
+            type: Boolean,
+            value: true,
+          },
+          drawerWidth: {
+            type: Number,
+            value: 290
+          },
+          trackEdge: {
+            type: Number,
+            value: 45
+          }
+        },
+        /**
+         * Public Method
+         * */
+        toggleDrawer: function(){
+          this.style.transition = 'all 0.3s ease-out';
+          if(this.drawerOpen){
+            this.drawerOpen = false;
+            this.translate3d( 0,0,0 );
+          } else {
+            this.drawerOpen = true;
+            this.translate3d( this.drawerWidth + 'px',0,0 );
+          }
+        },
+        togglepage: function() {
+          this.set('route.path', '/viewer');
+        },
+
+        /**
+        * Private Method
+        * */
+        _onScrollTo: function(e) {
+          if( this.route.path === '/reader' ) return;
+          this.$.articleViewer.$.ironList.scrollToIndex(e.detail.index);
+        },
+        _openArticleReader: function(e){
+          var pages = this.$.pages;
+          this.set('route.path', ('/reader/' + e.detail.item.serial ));
+          this.$.articleReader.data = e.detail.item;
+        },
+        /** Motion Function **/
+        _handlePageTrack: function(e) {
+          var triggerRange = 60;
+          var startX = e.detail.x - e.detail.dx;
+          var state = e.detail.state;
+
+          // prevent pc user selection
+          e.preventDefault();
+
+          // Edge ?
+          if ( this.drawerOpen === false && startX > this.trackEdge ){
+            // console.log('not edge track '+ e.detail.x);
+            this.drawerEnableTrack = false;
+            return;
+          } else {
+            this.drawerEnableTrack = true;
+          }
+          // Track Enable ?
+          if (!this.drawerEnableTrack) { /*console.log('unable track');*/ return;}
+
+          switch(true) {
+
+            /* Drawer is Open */
+            case ( this.drawerOpen === true && state ==='start' ):
+              break;
+            case ( this.drawerOpen === true && state ==='track' ):
+              this.translate3d( e.detail.dx + this.drawerWidth + 'px' , 0 , 0);
+              this.style.transition = '';
+              break;
+            case ( this.drawerOpen === true && state ==='end' ):
+              // End Return Transition
+              this.style.transition = 'all 0.3s ease-out';
+              // Trigger if -range < x < range
+              if( e.detail.dx < -triggerRange / 1.5 )  {
+                this.toggleDrawer();  break;
+              }
+              this.translate3d( this.drawerWidth + 'px' ,0,0 );
+              break;
+
+            /* Drawer is Close */
+            case ( this.drawerOpen === false && state ==='start' ):
+              break;
+            case ( this.drawerOpen === false && state ==='track' ):
+
+              this.translate3d( e.detail.dx + 'px' , 0 , 0);
+              this.style.transition = '';
+              break;
+            case ( this.drawerOpen === false && state ==='end' ):
+              // End Return Transition
+              this.style.transition = 'all 0.3s ease-out';
+              // Trigger if -range < x < range
+              if( e.detail.dx > triggerRange )  {
+                this.toggleDrawer();  break;
+              }
+              this.translate3d( '0px',0,0 );
+              break;
+          }
+        },
+
+        /**
+         *  Live
+         *  */
+        ready: function() {
+          this.async(function() {
+            // If we do not have an initial URL, we redirect to /page/viewer
+            if (!this.route.path) {
+              this.set('route.path', '/viewer');
+            }
+          },1);
+          /** Drawer Init **/
+          this.$.articleList.style.width = this.drawerWidth + 'px';
+          this.$.articleList.style.marginLeft = ( - this.drawerWidth ) + 'px';
+        }
+      });
+    })();
+  </script>
+</dom-module>

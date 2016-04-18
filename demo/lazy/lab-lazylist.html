@@ -1,0 +1,162 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../../bower_components/paper-styles/shadow.html">
+<link rel="import" href="lab-lazyelement.html">
+<link rel="import" href="../../poi-datahost.html">
+
+<script src="../../bower_components/lodash/dist/lodash.min.js"></script>
+
+
+<dom-module id="lab-lazylist">
+    <template>
+        <style include="iron-flex iron-flex-alignment iron-positioning">
+            :host {
+                display: block;
+                word-break: break-all;
+            }
+
+            #container {
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                overflow-y: auto;
+            }
+
+            #list {
+                height: 100%;
+                width: 100%;
+                overflow-y: auto;
+                background-color: #f0f0f0;
+            }
+
+            p {
+                line-height: 1.75;
+                font-size: 14px;
+                border-top: 5px solid silver;
+            }
+
+            .paper {
+                padding: 20px;
+                @apply(--shadow-elevation-2dp);
+            }
+
+            #loadingBottom {
+                position: fixed;
+                z-index: 10;
+                top:0; bottom: 0;
+                left: 0; right: 0;
+                transition: background 0.4s ease-in;
+                background: rgba(255,255,255, 0.5);
+            }
+
+            paper-spinner.maroon {
+                --paper-spinner-stroke-width: 2px;
+                --paper-spinner-color: maroon;
+            }
+        </style>
+        <poi-datahost id="datahost" data="{{data}}"></poi-datahost>
+        <div id="container">
+            <template is="dom-repeat" id="list" items="[[data]]" as="item" on-resize="_handleIronResize"
+                      initial-count="1" target-framerate="10000">
+                <!--//<template>-->
+                <div class="paper">
+                    <lab-lazyelement data="[[item]]" data-index$="[[index]]">[[item.text]]</lab-lazyelement>
+                </div>
+                <!--</template>-->
+            </template>
+            <div id="loadingBottom" hidden="{{!_Trigger}}"  class="layout horizontal center-center">
+                <paper-spinner class="maroon" active="{{_Trigger}}"></paper-spinner>
+            </div>
+            <iron-scroll-threshold
+                    id="holder"
+                    scroll-target="container"
+                    on-lower-threshold="_loadMoreData"
+                    lower-triggered="{{_Trigger}}"
+            ></iron-scroll-threshold>
+        </div>
+
+
+    </template>
+
+    <script>
+    (function () {
+        'use strict';
+
+        Polymer({
+            is: 'lab-lazylist',
+
+            properties: {
+                data: {
+                    type: Array,
+                    value: function () {
+                        return [];
+                    },
+                    notify: true
+                },
+                hidden: {
+                    type: Boolean,
+                    value: true
+                }
+            },
+            observers: [
+                '_dataAddedOrRemoved(data.length)'
+            ],
+            /**
+             * Public
+             * */
+
+            /**
+             * Private
+             * */
+            _handleIronResize: function (e) {
+                var index = parseInt(e.target.getAttribute('data-index')) || 0;
+                console.log('resize tigger by item Index: ' + index);
+                // this.async( function(){ this.$.list.updateSizeForItem(index) }, 800);
+            },
+            _loadMoreData: function () {
+                if (this._loadedPage > 9) return;
+                this.async(function () {
+                    this.$.datahost.requestNextPage();
+                    this.async( function() {
+                        this.$.holder.clearTriggers();
+                    }, 1000)
+                }, 1000);
+                this._loadedPage++;
+            },
+            _dataAddedOrRemoved: function (length) {
+                length === 0 || length === undefined ?
+                    this.hidden = true :
+                    this.async(function(){
+                        this.hidden = false;
+                    }, 1000);
+            },
+            /**
+             * Live
+             * */
+            attached: function () {
+                console.log('*** Attached ');
+            },
+            ready: function () {
+                console.log('*** Ready ');
+            },
+            _loadedPage: 0,
+            _Trigger: Boolean
+        });
+    })();
+    </script>
+</dom-module>

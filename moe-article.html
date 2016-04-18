@@ -1,0 +1,440 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+
+<link rel="import" href="bower_components/polymer/polymer.html">
+
+<!-- iron -->
+<link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="bower_components/iron-image/iron-image.html">
+<link rel="import" href="bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="bower_components/iron-dropdown/iron-dropdown.html">
+
+<!-- paper -->
+<link rel="import" href="bower_components/paper-button/paper-button.html">
+<link rel="import" href="bower_components/paper-toggle-button/paper-toggle-button.html">
+
+<link rel="import" href="bower_components/paper-item/paper-item.html">
+<link rel="import" href="bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="bower_components/paper-styles/shadow.html">
+<link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
+
+<!-- neon -->
+<link rel="import" href="bower_components/neon-animation/neon-animatable-behavior.html">
+<link rel="import" href="bower_components/neon-animation/neon-animation.html">
+
+<!-- other -->
+<link rel="import" href="bower_components/juicy-html/juicy-html.html">
+
+<script src="bower_components/imagesloaded/imagesloaded.pkgd.min.js"><</script>
+<script src="bower_components/lodash/dist/lodash.min.js"><</script>
+
+<dom-module id="moe-article">
+    <template>
+        <style include="iron-flex iron-flex-alignment iron-positioning">
+            :host {
+                @apply(--layout-vertical);
+                @apply(--layout-relative);
+                @apply(--paper-font-common-base);
+                color: #800000;
+                word-break: break-word;
+            }
+
+            /* Main */
+
+            #container {
+                padding-bottom: 40px;
+            }
+
+            #manage {
+                font-size: 13px;
+            }
+
+            .text {
+                -webkit-user-select: text !important;
+            }
+
+            .thumb.anchor.main {
+                display: inline-block;
+                margin-right: 15px;
+                display: block;
+                float: left;
+            }
+
+            .post-info {
+                flex-wrap: wrap;
+                padding: 0 0 0 3px;
+                margin-right: 16px;
+            }
+
+            .post-info > span {
+                padding-right: 3px;
+            }
+
+            .post-info .post-title {
+                color: #cc1105;
+                font-weight: bold;
+            }
+
+            .post-info .post-nickname {
+                color: #117743;
+                font-weight: bold;
+            }
+
+            .post-info .post-id {
+
+            }
+
+            .post-info .post-time {
+
+            }
+
+            .post-info .post-serial {
+
+            }
+
+            /* response */
+            #responseContainer {
+                @apply(--layout-relative);
+            }
+
+            #responseMenu {
+                position: absolute;
+            }
+
+            #responseMenu paper-menu {
+                --paper-menu: {
+                    @apply(--shadow-elevation-2dp);
+                }
+            }
+
+            .response {
+                display: table;
+                padding-bottom: 10px;
+                margin-bottom: 3px;
+                background: #F0E0D6;
+            }
+
+            .response .text {
+                margin: 10px 20px 0;
+            }
+
+            .response .manage {
+                position: absolute;
+                right: 0px;
+                top: 4px;
+            }
+
+            .response .thumb {
+                display: block;
+                max-width: 125px;
+                max-height: 125px;
+                float: left;
+            }
+
+            .response .thumb.anchor {
+                margin-left: 15px;
+                margin-right: 10px;
+            }
+
+            .response .thumb.anchor::before {
+                /* Fix response collapse by image. */
+                content: '';
+                float: left;
+                width: 160px;
+                line-height: 0;
+                font-size: 0;
+                padding: 0;
+                margin: 0;
+            }
+
+            /* Paper Style */
+
+            paper-button {
+                font-size: 13px;
+
+            }
+
+            paper-button iron-icon {
+                vertical-align: -5px;
+                padding-right: 5px;
+            }
+
+            paper-button.mini {
+                --paper-button: {
+                    padding: 3px 6px;
+                };
+                -moz-user-select: none;
+                -ms-user-select: none;
+                -webkit-user-select: none;
+                -webkit-touch-callout: none;
+                user-select: none;
+                -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+            }
+
+            paper-button.mini iron-icon {
+                --iron-icon-height: 17px;
+                --iron-icon-width: 17px;
+                vertical-align: -4px;
+            }
+
+            paper-menu-button {
+                padding: 0;
+            }
+
+            paper-icon-button.mini {
+                --paper-icon-button: {
+                    width: 23px;
+                    height: 23px;
+                    padding: 3px;
+                }
+            }
+        </style>
+
+        <!-- Main Content -->
+        <template is="dom-if" if="{{hidden}}"><h3 style="text-align: center;">少女祈禱中</h3></template>
+        <div id="container" class="flex" hidden="[[hidden]]">
+            <!-- Manage Element -->
+            <div id="manage" class="layout horizontal end end-justified">
+                <!-- Right -->
+                <paper-icon-button icon="icons:open-in-new" class=""></paper-icon-button>
+                <paper-icon-button icon="icons:flag" class=""></paper-icon-button>
+
+                <template is="dom-if" if="{{_subBinding}}">
+                    <paper-menu-button class="paper-menu-button" horizontal-align="right" no-animations on-tap="_handlePopupAction" action-type="open-article-menu">
+                        <paper-icon-button icon="icons:more-vert" class="dropdown-trigger"></paper-icon-button>
+                        <paper-menu class="dropdown-content">
+                            <paper-item on-tap="_handlePopupAction" action-type="open-editor">
+                                <iron-icon icon="editor:mode-edit"></iron-icon>
+                                編輯
+                            </paper-item>
+                            <paper-item>
+                                <iron-icon icon="icons:lock-outline"></iron-icon>
+                                鎖定
+                            </paper-item>
+                        </paper-menu>
+                        <paper-item class="dropdown-content">
+                            <paper-toggle-button>Sage</paper-toggle-button>
+                        </paper-item>
+                    </paper-menu-button>
+                </template>
+            </div>
+            <hr>
+            <!-- Content -->
+
+            <div class="layout horizontal post-info">
+                <span class="post-title">[[data.title]]</span>
+                <span class="post-nickname">[[data.name]]</span>
+                <span class="post-id">ID:[[data.id]]</span>
+                <span class="post-time">[[data.time]]</span>
+                <span class="post-serial">No.[[data.serial]]</span>
+            </div>
+            <template is="dom-if" if="[[data.thumb]]">
+                <a class="thumb anchor main" href="[[data.image]]" target="_blank">
+                    <img class="thumb" src="[[data.thumb]]" data-index$="[[index]]">
+                </a>
+            </template>
+
+            <div class="text text-main">
+                <template is="juicy-html" content$="[[data.text]]"></template>
+            </div>
+            <div>[[data.serial]]</div>
+            <!--/ Content -->
+
+            <!-- More Response -->
+            <template is="dom-if" if="[[data.responseCounts]]">
+                <paper-button on-tap="_handlePopupAction" action-type="open-reader">[[data.responseCounts]]
+                </paper-button>
+            </template>
+
+            <!-- Response -->
+            <div id="responseContainer">
+                <template is="dom-repeat" id="list" items="[[data.response]]" as="response" index-as="responseIndex"
+                          initial-count="5">
+
+                    <div class="response">
+                        <div class="layout vertical">
+                            <!-- Manage -->
+                            <div class="layout horizontal relative">
+                                <div class="layout horizontal flex post-info">
+                                    <span class="post-title">[[response.title]]</span>
+                                    <span class="post-nickname">[[response.name]]</span>
+                                    <span class="post-id">ID:[[response.id]]</span>
+                                    <span class="post-time">[[response.time]]</span>
+                                    <span class="post-serial">No.[[response.serial]]</span>
+                                </div>
+                                <!-- TODO: EFFICIENCY ISSUE -->
+                                <template is="dom-if" if="{{_subBinding}}">
+                                    <div class="layout vertical manage">
+                                        <paper-icon-button icon="icons:more-vert" class="mini"
+                                                           on-tap="_handlePopupAction"
+                                                           action-type="open-response-menu"
+                                        ></paper-icon-button>
+                                        <paper-icon-button icon="icons:flag" class="mini"></paper-icon-button>
+                                    </div>
+                                </template>
+                            </div>
+                            <div>
+                                <template is="dom-if" if="[[response.image]]">
+                                    <a class="thumb anchor" id="imageAnchor" href="[[response.image]]" target="_blank">
+                                        <img class="thumb" src="[[response.thumb]]"
+                                             data-index$="[[responseIndex]]" data-outer-index$="[[index]]">
+                                    </a>
+                                </template>
+                                <div class="text text-response">
+                                    <template is="juicy-html" content$="[[response.text]]"></template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <!-- Popup Elements -->
+                <iron-dropdown id="responseMenu" horizontal-align="right" vertical-align="top">
+                    <paper-menu class="dropdown-content">
+                        <paper-item on-tap="_handlePopupAction" action-type="open-editor">編輯</paper-item>
+                        <paper-item>刪除</paper-item>
+                    </paper-menu>
+                </iron-dropdown>
+                <!--/ Popup Elements -->
+            </div>
+            <!--/ Response-->
+        </div>
+        <!--/ Main Content -->
+
+    </template>
+    <script>
+        (function () {
+            'use strict';
+
+            Polymer({
+                is: 'moe-article',
+
+                behaviors: [
+                    Polymer.NeonAnimatableBehavior
+                ],
+                properties: {
+                    data: {
+                        type: Object,
+                        value: function () {
+                            return {};
+                        }
+                    },
+                    animationConfig: {
+                        type: Object,
+                        value: function () {
+                            return {
+                                'entry': [{
+                                    name: 'slide-from-left-animation',
+                                    node: this
+                                }],
+                                'exit': [{
+                                    name: 'fade-out-animation',
+                                    node: this
+                                }]
+                            }
+                        }
+                    },
+                    hidden: {
+                        type: Boolean,
+                        value: true
+                    },
+                    textEditorContent: {
+                        type: String
+                    }
+
+                },
+                /**
+                 *  Actions
+                 *  */
+                _handlePopupAction: function (e) {
+                    var target = e.currentTarget;
+                    var action = target.getAttribute('action-type');
+                    var data = {};
+                    var type = '';
+
+                    switch (action) {
+                        case 'open-reader':
+                            // Fire Open Reader
+                            this.fire('open-article-reader', {'item': e.model.data});
+                            break;
+                        case 'open-editor':
+                            this.fire('open-article-editor', {
+                                'data': this._actionData.data
+                            });
+                            break;
+                        case 'open-article-menu':
+                            data = this.data;
+                            type = 'article';
+                            break;
+                        case 'open-response-menu':
+                            data = this.$.list.itemForElement(target);
+                            type = 'response';
+                            var menu = this.$.responseMenu;
+
+                            // TODO: 現在暫時先用相對位置，要找個 find element in event.path 方法 ex: _.find('.response', e.path );
+                            // 設定 menu 位置
+                            var offsetTarget = target.offsetParent.offsetParent; // should be .response
+                            menu.verticalOffset = offsetTarget.offsetTop;
+
+                            menu.open();
+                            break;
+                    }
+
+                    /* store action */
+                    this._actionData = {
+                        target: target,
+                        action: action,
+                        data: data,
+                        index: this.$.list.indexForElement(target),
+                        type: type
+                    };
+                },
+                onAlways: function (instance) {
+                    this._onElementLoad();
+                    this.async(function () {
+                        //console.log('★★★all images are loaded★★★');
+                    }, 1);
+                },
+                _onElementLoad: function (e) {
+                    // All Elements are Load complete
+                    this.set('hidden', false);
+                    this.async(function () {
+                        // lazy render sub elements
+                        this._subBinding = true;
+                    }, 500);
+                },
+                /**
+                 *  Life
+                 * */
+                ready: function () {
+                    console.log('* Ready ');
+                    this.async(function () {
+                        var thumbs = this.querySelector('.thumb');
+                        // 沒有圖就直接顯示
+                        if (!thumbs) {
+                            this._onElementLoad();
+                        }
+                        var imgLoad = imagesLoaded(thumbs);
+                        imgLoad.once('always', this.onAlways.bind(this));
+                    });
+                },
+                /**
+                 *  Local Properties
+                 * */
+                _subBinding: false,
+                _actionData: {},
+            });
+        })();
+    </script>
+</dom-module>

@@ -1,0 +1,51 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/iron-resizable-behavior">
+
+<dom-module id="poi-thumb">
+
+  <script>
+    (function() {
+      'use strict';
+
+      Polymer({
+        is: 'poi-thumb',
+
+        behaviors: [ Polymer.IronResizableBehavior ],
+
+        extends: 'img',
+
+        created: function() {
+
+        },
+
+        listeners: {
+          'iron-resize': '_onIronResize'
+        },
+        ready: function() {
+          this.onload = this._onImgLoad;
+        },
+        detached: function(){
+//          console.log( 'Detached: ' + this.offsetHeight + ' vs ' + this.style.height );
+        },
+        _onImgLoad: function() {
+          if ( this.name === 'resized' ) { console.log('wow' ); return; }
+          this.style.width = this.offsetWidth + 'px';
+          this.style.height = this.offsetHeight + 'px';
+        },
+        _onIronResize: function(e) {
+        }
+
+      });
+    })();
+  </script>
+</dom-module>

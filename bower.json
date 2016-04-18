@@ -1,0 +1,31 @@
+{
+  "name": "poi-admin-pages",
+  "authors": [
+    "JohnsonChung <johnson780510@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.4.0",
+    "iron-elements": "PolymerElements/iron-elements#^1.0.9",
+    "paper-elements": "PolymerElements/paper-elements#^1.0.7",
+    "neon-elements": "PolymerElements/neon-elements#^1.0.0",
+    "carbon-elements": "PolymerElements/carbon-elements#^0.1.0",
+    "juicy-html": "Juicy/juicy-html#^1.1.0",
+    "iron-swipeable-pages": "MeTaNoV/iron-swipeable-pages#edge-sensitivity",
+    "lodash": "^4.11.0",
+    "poi-datahost": "moetw/poi-datahost#develop",
+    "imagesloaded": "^4.1.0",
+    "loaders.css": "ConnorAtherton/loaders.css#^0.1.2"
+  }
+}

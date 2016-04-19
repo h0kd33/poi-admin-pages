@@ -1,0 +1,199 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="bower_components/neon-animation/neon-shared-element-animatable-behavior.html">
+<!--<link rel="import" href="bower_components/">-->
+
+<!-- Library -->
+<script src="node_modules/justified-layout/dist/justified-layout.min.js"></script>
+<script src="bower_components/lodash/dist/lodash.min.js"></script>
+<script src="bower_components/imagesloaded/imagesloaded.pkgd.min.js"></script>
+
+<dom-module id="moe-album-layout">
+    <template>
+        <style include="iron-flex iron-flex-alignment iron-positioning">
+            :host {
+                color: #800000;
+                --webkit-user-select: none;
+                @apply(--layout-fit);
+                @apply(--layout-scroll);
+            }
+
+            #layout {
+                position: relative;
+            }
+
+            .thumb {
+                /*position: absolute;*/
+            }
+        </style>
+
+        <!--<carbon-route route="{{route}}" pattern="/:serial" data="{{routeData}}"></carbon-route>-->
+
+        <div id="container">
+            <h1>album</h1>
+            <div id="layout">
+                <template id="articleRepeat" is="dom-repeat" items="[[data]]" as="item">
+                    <img src="[[item.thumb]]" alt="" class="thumb">
+                    <template id="responseRepeat" is="dom-repeat" items="[[item.response]]" as="response">
+                        <img src="[[response.thumb]]" alt="" class="thumb">
+                    </template>
+                </template>
+            </div>
+        </div>
+    </template>
+    <script>
+
+
+        (function () {
+            'use strict';
+            Polymer({
+                is: 'moe-album-layout',
+
+                behaviors: [Polymer.NeonSharedElementAnimatableBehavior],
+
+                properties: {
+                    data: {
+                        type: Array,
+                        value: function () {
+                            return []
+                        }
+                    },
+                    viewerData: {
+                        type: Object,
+                        notify: true,
+                        value: function () {
+                            return {}
+                        }
+                    },
+                    layoutConfig: {
+                        type: Object,
+                        value: function () {
+                            return {}
+                        }
+                    },
+                    animationConfig: {
+                        value: function () {
+                            return {
+                                // the outgoing page defines the 'exit' animation
+                                'exit': [{
+                                    name: 'hero-animation',
+                                    id: 'hero',
+                                    fromPage: this
+                                }]
+                            }
+                        }
+                    }
+                },
+
+                listeners: {
+                    'tap': '_onTap'
+                },
+                /**
+                 *  Events
+                 * */
+                _onTap: function(event) {
+                    var target = event.target;
+
+                    if (target.classList.contains('thumb')) {
+                        // transfer Data for image-viewer
+                        // 暫時使用
+
+                        var item = target._templateInstance.dataHost.itemForElement(target);
+
+                        if( item === undefined ) {
+                            item = this.$.articleRepeat.itemForElement(target);
+                        }
+                        this.set( 'viewerData', item );
+
+                        // configure the page animation
+                        this.sharedElements = {
+                            'hero': target
+                        };
+                        var nodesToScale = [];
+                        var thumbs = Polymer.dom(this.root).querySelectorAll('.thumb');
+                        for (var node, index = 0; node = thumbs[index]; index++) {
+                            if (node !== event.target) {
+                                nodesToScale.push(node);
+                            }
+                        }
+                        // this.animationConfig['exit'][1].nodes = nodesToScale;
+                        this.fire('thumb-click');
+                    }
+                },
+
+                onAlways: function () {
+                    /* Justified Layout */
+                    var layout = require('justified-layout');
+                    var dimensionArray = [];
+                    for (var i = 0; i < this._thumbsCache.length; i++) {
+                        var el = this._thumbsCache[i];
+                        var dimension = {
+                            height: el.offsetHeight,
+                            width: el.offsetWidth
+                        };
+                        dimensionArray.push(dimension);
+                    }
+
+                    this.layoutConfig = {
+                        containerWidth: this.$.container.offsetWidth,
+                        targetRowHeight: 165,
+                        fullWidthBreakoutRowCadence: 3
+                    };
+
+                    var geometry = layout(dimensionArray, this.layoutConfig);
+                    this.$.layout.style.height = geometry.containerHeight + 'px';
+
+                    for (var i = 0; i < this._thumbsCache.length; i++) {
+                        var el = this._thumbsCache[i];
+                        var image = geometry.boxes[i];
+                        el.style.position = 'absolute';
+                        el.style.top = image.top + 'px';
+                        el.style.left = image.left + 'px';
+                        el.style.width = image.width + 'px';
+                        el.style.height = image.height + 'px';
+                    };
+
+                },
+                _onElementLoad: function () {
+                    console.log(' ==== no images ====')
+                },
+                /**
+                 * Live
+                 * */
+                ready: function () {
+
+                    /* Images Loaded*/
+                    console.log('* Ready ');
+                    this.async(function () {
+                        var thumbs = this.querySelectorAll('.thumb');
+                        // hack remove undefined src
+                        thumbs = _.filter(thumbs, function(el){
+                            return el.getAttribute('src') !== "undefined"});
+                        console.log(thumbs);
+                        this._thumbsCache = thumbs;
+                        if (!thumbs) {
+                            this._onElementLoad();
+                            return;
+                        }
+                        var imgLoad = imagesLoaded(thumbs);
+
+                        imgLoad.once('always', this.onAlways.bind(this));
+                    }, 1000);
+                },
+                _thumbsCache: []
+            });
+        })();
+    </script>
+</dom-module>

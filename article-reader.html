@@ -13,10 +13,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="bower_components/iron-flex-layout/iron-flex-layout.html">
 
-<link rel="import" href="bower_components/paper-toggle-button/paper-toggle-button.html">
-
-<link rel="import" href="bower_components/neon-animation/neon-animatable-behavior.html">
-
 <link rel="import" href="bower_components/carbon-route/carbon-route.html">
 
 
@@ -29,21 +25,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style>
       :host {
-        word-break: break-all;
+
       }
     </style>
 
     <carbon-route route="{{route}}" pattern="/:serial" data="{{routeData}}"></carbon-route>
 
     <div class="container">
-
-
-      <paper-toggle-button on-tap="_onTap"> SAGE: <span>[[sage]]</span></paper-toggle-button>
-      <h1>[[data.text]]</h1>
-      <template is="dom-repeat" items="[[data.response]]" as="item">
-          <moe-article data="[[item]]"></moe-article>
-      </template>
-
+      <moe-article data="[[data]]"></moe-article>
     </div>
 
   </template>
@@ -55,36 +44,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Polymer({
         is: 'article-reader',
 
-        behaviors: [
-          Polymer.NeonAnimatableBehavior
-        ],
-
         properties: {
           data: {
             type: Array,
             value: function(){ return []}
-          },
-          animationConfig: {
-            type: Object,
-            value: function() {
-              return {
-                'entry': [{
-                  name: 'slide-from-right-animation',
-                  node: this
-                }, {
-                  name: 'fade-in-animation',
-                  node: this
-                  }],
-                'exit': [{
-                  name: 'slide-right-animation',
-                  node: this
-                }]
-              }
-            }
           }
-        },
-        _onTap: function() {
-
         }
       });
     })();

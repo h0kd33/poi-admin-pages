@@ -33,22 +33,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             #layout {
                 position: relative;
             }
-
+            .section .thumb:first-child {
+                border-left: 4px solid skyblue;
+                margin-left: -4px;
+            }
             .thumb {
-                /*position: absolute;*/
+            }
+            .thumb[src=undefined] {
+                display: none;
             }
         </style>
-
-        <!--<carbon-route route="{{route}}" pattern="/:serial" data="{{routeData}}"></carbon-route>-->
 
         <div id="container">
             <h1>album</h1>
             <div id="layout">
-                <template id="articleRepeat" is="dom-repeat" items="[[data]]" as="item">
-                    <img src="[[item.thumb]]" alt="" class="thumb">
-                    <template id="responseRepeat" is="dom-repeat" items="[[item.response]]" as="response">
-                        <img src="[[response.thumb]]" alt="" class="thumb">
-                    </template>
+                <template id="repeatArticle" is="dom-repeat" items="[[data]]" as="item">
+                    <div class="section">
+                        <img src="[[item.thumb]]" alt="" class="thumb" on-tap="_onTap">
+                        <template id="repeatResponse" is="dom-repeat" items="[[item.response]]" as="response">
+                            <img src="[[response.thumb]]" alt="" class="thumb" on-tap="_onTap">
+                        </template>
+                    </div>
                 </template>
             </div>
         </div>
@@ -97,40 +102,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     }
                 },
 
-                listeners: {
-                    'tap': '_onTap'
-                },
                 /**
                  *  Events
                  * */
                 _onTap: function(event) {
                     var target = event.target;
 
-                    if (target.classList.contains('thumb')) {
-                        // transfer Data for image-viewer
-                        // 暫時使用
+                    var item = event.model.dataHost.itemForElement(target);
 
-                        var item = target._templateInstance.dataHost.itemForElement(target);
-
-                        if( item === undefined ) {
-                            item = this.$.articleRepeat.itemForElement(target);
-                        }
-                        this.set( 'viewerData', item );
-
-                        // configure the page animation
-                        this.sharedElements = {
-                            'hero': target
-                        };
-                        var nodesToScale = [];
-                        var thumbs = Polymer.dom(this.root).querySelectorAll('.thumb');
-                        for (var node, index = 0; node = thumbs[index]; index++) {
-                            if (node !== event.target) {
-                                nodesToScale.push(node);
-                            }
-                        }
-                        // this.animationConfig['exit'][1].nodes = nodesToScale;
-                        this.fire('thumb-click');
+                    if( item === undefined ) {
+                        item = this.$.articleRepeat.itemForElement(target);
                     }
+                    this.set( 'viewerData', item );
+
+                    // configure the page animation
+                    this.sharedElements = {
+                        'hero': target
+                    };
+                    var nodesToScale = [];
+                    var thumbs = Polymer.dom(this.root).querySelectorAll('.thumb');
+                    for (var node, index = 0; node = thumbs[index]; index++) {
+                        if (node !== event.target) {
+                            nodesToScale.push(node);
+                        }
+                    }
+                    // this.animationConfig['exit'][1].nodes = nodesToScale;
+                    this.fire('thumb-click');
                 },
 
                 onAlways: function () {
@@ -181,7 +178,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         // hack remove undefined src
                         thumbs = _.filter(thumbs, function(el){
                             return el.getAttribute('src') !== "undefined"});
-                        console.log(thumbs);
                         this._thumbsCache = thumbs;
                         if (!thumbs) {
                             this._onElementLoad();

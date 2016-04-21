@@ -11,20 +11,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <html>
 <head>
 
-    <title>Album-Viewer</title>
+    <title>Article-Viewer</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
     <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../bower_components/polymer/polymer.html">
     <link rel="import" href="../poi-datahost.html">
-    <link rel="import" href="../moe-album-page.html">
+    <link rel="import" href="../article-page.html">
 
 </head>
 <body>
 <template is="dom-bind" id="scope">
     <poi-datahost data="{{data}}"></poi-datahost>
-    <moe-album-page data="[[data]]"></moe-album-page>
+    <article-page data="[[data]]"></article-page>
 </template>
 <script>
     (function(){

@@ -1,0 +1,118 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/carbon-route/carbon-location.html">
+<link rel="import" href="../../bower_components/carbon-route/carbon-route.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+
+
+<dom-module id="lab-page-route">
+    <template>
+        <style>
+            :host {
+                position: fixed;
+                top:0;
+                left:0;
+                right:0;
+                bottom:0;
+                background-color: #ccc;
+            }
+            iron-pages {
+                height: 100%;
+                width: 100%;
+            }
+        </style>
+        <!-- Qusetion
+        可以用 params 決定跳到哪一頁嗎？
+        可以在 nested iron-pages 共用同一個路徑嗎？
+        -->
+        <carbon-location route="{{route}}" use-hash-as-path></carbon-location>
+        <carbon-route
+            route="{{route}}"
+            pattern="/:page"
+            data="{{routeData}}"
+            tail="{{routeTail}}">
+        </carbon-route>
+        <!--<carbon-route-->
+                <!--route="{{route}}"-->
+                <!--pattern="/:page"-->
+                <!--data="{{routeData}}"-->
+                <!--tail="{{routeTail}}">-->
+        <!--</carbon-route>-->
+        <!--<carbon-route-->
+                <!--route="{{routeTail}}"-->
+                <!--pattern="/:tail"-->
+                <!--data="{{tailRouteData}}">-->
+        <!--</carbon-route>-->
+        <iron-pages selected="{{routeData.page}}" attr-for-selected="id">
+            <section id="page">
+                <h1>Page</h1>
+                <a href="">Article-></a>
+            </section>
+            <section id="article">
+                <h1>Article</h1>
+                <a href=""><-Page</a>
+            </section>
+        </iron-pages>
+
+        <!--<iron-pages selected="{{routeData.page}}" attr-for-selected="key">-->
+            <!--&lt;!&ndash; page &ndash;&gt;-->
+            <!--<iron-pages key="page" selected="{{routeData.page}}" attr-for-selected="key">-->
+                <!--<section key="article">-->
+                    <!--<h1>Article-Viewer</h1>-->
+                    <!--<a href="./#/page/article?serial=111">Reader-></a>-->
+                    <!--<a href="./#/page/album">Album-></a>-->
+                <!--</section>-->
+                <!--<section key="album">-->
+                    <!--<h1>Album</h1>-->
+                    <!--<a href="./#/page/article">Viewer-></a>-->
+                    <!--<a href="./#/page/album/image">Image-></a>-->
+                <!--</section>-->
+            <!--</iron-pages>-->
+            <!--&lt;!&ndash; reader &ndash;&gt;-->
+            <!--<section key="reader">-->
+                <!--<h1>Reader</h1>-->
+                <!--<a href="./#/page/article"><-article-viewer</a>-->
+                <!--<a href="./#/page/article?serial=222&tail=111,222">Reader2-></a>-->
+            <!--</section>-->
+            <!--&lt;!&ndash; push &ndash;&gt;-->
+            <!--<section key="push">-->
+                <!--<h1>Push</h1>-->
+                <!--<a href="./#/page/article"><-Page</a>-->
+            <!--</section>-->
+        <!--</iron-pages>-->
+
+    </template>
+    <script>
+        (function () {
+            'use strict';
+
+            Polymer({
+                is: 'lab-page-route',
+
+                properties: {
+                    foo: {
+                        type: String,
+                        value: 'lab-page-route',
+                        notify: true
+                    }
+                },
+                ready: function(){
+                    this.async(function(){
+                        if (!this.route.path) {
+                            this.set('route.path', '/page/article');
+                        }
+                    },1)
+                }
+            });
+        })();
+    </script>
+</dom-module>

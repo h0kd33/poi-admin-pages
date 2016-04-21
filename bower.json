@@ -22,10 +22,10 @@
     "neon-elements": "PolymerElements/neon-elements#^1.0.0",
     "carbon-elements": "PolymerElements/carbon-elements#^0.1.0",
     "juicy-html": "Juicy/juicy-html#^1.1.0",
-    "iron-swipeable-pages": "MeTaNoV/iron-swipeable-pages#edge-sensitivity",
     "lodash": "^4.11.0",
     "poi-datahost": "moetw/poi-datahost#develop",
     "imagesloaded": "^4.1.0",
-    "loaders.css": "ConnorAtherton/loaders.css#^0.1.2"
+    "loaders.css": "ConnorAtherton/loaders.css#^0.1.2",
+    "iron-swipeable-pages": "^1.2.3"
   }
 }

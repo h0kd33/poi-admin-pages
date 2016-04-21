@@ -11,26 +11,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <html>
 <head>
 
-    <title>Article-Viewer</title>
+    <title>lab-page-router</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
-    <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-    <link rel="import" href="../bower_components/polymer/polymer.html">
-    <link rel="import" href="../poi-datahost.html">
-    <link rel="import" href="../article-viewer.html">
+    <script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="lab-page-route.html">
 
 </head>
 <body>
 <style>
+    body {
+        position: relative;
+    }
 </style>
-    <template is="dom-bind" id="scope">
-<poi-datahost data="{{data}}"></poi-datahost>
-<article-viewer data="[[data]]"></article-viewer>
-</template>
-<script>
-    (function(){
+<lab-page-route></lab-page-route>
 
-    })(document.querySelector('#scope'));
-</script>
 </body>
+</html>

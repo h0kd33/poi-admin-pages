@@ -22,7 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- Library -->
 <script src="bower_components/lodash/dist/lodash.min.js"></script>
 
-<dom-module id="moe-album-viewer">
+<dom-module id="moe-album-page">
     <template>
         <style include="iron-flex iron-flex-alignment iron-positioning">
             :host {
@@ -43,7 +43,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
         </style>
 
-        <!--<carbon-route route="{{route}}" pattern="/:serial" data="{{routeData}}"></carbon-route>-->
+        <carbon-route route="{{route}}" pattern="/:serial" data="{{routeData}}"></carbon-route>
         <neon-animated-pages id="pages" selected="[[selected]]">
             <moe-album-layout on-thumb-click="togglePage" data="[[data]]" viewer-data="{{viewerData}}"></moe-album-layout>
             <moe-album-image-viewer on-close-page="togglePage" data="[[viewerData]]" ></moe-album-image-viewer>
@@ -55,7 +55,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         (function () {
             'use strict';
             Polymer({
-                is: 'moe-album-viewer',
+                is: 'moe-album-page',
 
 
                 properties: {

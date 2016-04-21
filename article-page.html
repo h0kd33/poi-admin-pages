@@ -39,7 +39,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="moe-article.html">
 
 
-<dom-module id="article-viewer">
+<dom-module id="article-page">
   <template>
     <style include="iron-flex iron-flex-alignment iron-positioning">
       :host {
@@ -120,11 +120,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <paper-dialog id="textEditor" exit-animation="fade-out-animation" entry-animation="slide-from-bottom-animation" no-cancel-on-outside-click>
       <div class="layout vertical">
         <h2 id="editorTitle">編輯<span id="editorSerial"></span></h2>
-        <form action="">
-          <iron-autogrow-textarea name="" id="editorTextarea" value="{{textEditorContent}}" rows="8">asdsad</iron-autogrow-textarea>
+        <form>
+          <iron-autogrow-textarea name="" id="editorTextarea" value="{{textEditorContent}}" rows="8"></iron-autogrow-textarea>
         </form>
         <div class="layout horizontal">
-          <paper-button dialog-dismiss><iron-icon icon="icons:close"></iron-icon>取消</paper-button>;
+          <paper-button dialog-dismiss><iron-icon icon="icons:close"></iron-icon>取消</paper-button>
           <paper-button dialog-confirm class="green" style="margin-left: auto ">儲存</paper-button>
         </div>
       </div>
@@ -139,7 +139,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       'use strict';
 
       Polymer({
-        is: 'article-viewer',
+        is: 'article-page',
 
         behaviors: [
           Polymer.NeonAnimatableBehavior
@@ -178,9 +178,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // load async stuff. e.g. XHR
         },
         _openEditor: function(e) {
+          console.log(e);
           this.$.textEditor.open();
-          this.$.editorSerial.innerText = ' #' + e.detail.data.serial;
           this.textEditorContent = e.detail.data.text;
+          this.$.editorSerial.innerText = ' #' + e.detail.data.serial;
         }
       });
     })();

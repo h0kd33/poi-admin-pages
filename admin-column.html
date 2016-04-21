@@ -28,9 +28,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- Custom Elements -->
 <link rel="import" href="poi-datahost.html">
 <link rel="import" href="article-list.html">
-<link rel="import" href="article-viewer.html">
+<link rel="import" href="article-page.html">
 <link rel="import" href="article-reader.html">
-<link rel="import" href="moe-album-viewer.html">
+<link rel="import" href="moe-album-page.html">
 
 <dom-module id="admin-column" >
   <template>
@@ -54,8 +54,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
     <!-- Route -->
     <carbon-location route="{{route}}" use-hash-as-path></carbon-location>
-    <carbon-route route="{{route}}" pattern="/:pageName" data="{{routeData}}" tail="{{routeTail}}"></carbon-route>
-    <carbon-route route="{{routeTail}}" pattern="/:responseSerial" data="{{tailRouteData}}"></carbon-route>
+    <carbon-route
+      route="{{route}}"
+      pattern="/:page"
+      data="{{routeData}}"
+      tail="{{routeTail}}">
+    </carbon-route>
+    <carbon-route
+      route="{{routeTail}}"
+      pattern="/:responseSerial"
+      data="{{tailRouteData}}">
+    </carbon-route>
 
     <!-- AJAX -->
     <poi-datahost id="datahost" data="{{data}}"></poi-datahost>
@@ -65,26 +74,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <article-list id="articleList" data="[[data]]" on-scroll-to="_onScrollTo"></article-list>
       <div class="layout vertical flex">
-        <paper-tabs selected="{{routeData.pageName}}" attr-for-selected="name">
+        <paper-tabs selected="{{routeData.page}}" attr-for-selected="name">
           <paper-tab name="viewer">文章模式</paper-tab>
           <paper-tab name="album">相簿</paper-tab>
         </paper-tabs>
         <iron-swipeable-pages
                 id="mainPages"
                 class="flex"
-                selected="{{routeData.pageName}}"
+                selected="{{routeData.page}}"
                 attr-for-selected="key"
                 on-track="_handlePageTrack"
                 edge-swipe-sensitivity="45"
                 no-cycle>
           <!-- First Level -->
-          <article-viewer id="articleViewer" key="viewer" data="[[data]]"></article-viewer>
-          <moe-album-viewer id="albumViewer" key="album" data="[[data]]"></moe-album-viewer>
+          <article-page id="articleViewer" key="viewer" data="[[data]]"></article-page>
+          <moe-album-page id="albumViewer" key="album" data="[[data]]"></moe-album-page>
           <!-- Tail -->
-          <neon-animated-pages class="flex" id="readerPages" key="reader" selected="{{tailRouteData.responseSerial}}"
-                               attr-for-selected="key">
-            <article-reader id="articleReader" key="articleReader" on-tap="togglepage"></article-reader>
-            <article-reader id="pushReader" key="pushReader" on-tap="togglepage"></article-reader>
+          <article-reader id="articleReader"
+                          on-tap="togglepage"
+                          key="reader"
+                          selected="{{tailRouteData.responseSerial}}"
+                          attr-for-selected="key">
+          </article-reader>
           </neon-animated-pages>
         </iron-swipeable-pages>
       </div>
@@ -156,9 +167,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.$.articleViewer.$.ironList.scrollToIndex(e.detail.index);
         },
         _openArticleReader: function(e){
-          var pages = this.$.pages;
           this.set('route.path', ('/reader/' + e.detail.item.serial ));
-          this.$.articleReader.data = e.detail.item;
+          this.$.articleReader.data = e.detail.data;
         },
         /** Motion Function **/
         _handlePageTrack: function(e) {

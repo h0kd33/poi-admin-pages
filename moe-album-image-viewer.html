@@ -56,9 +56,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div id="container" class="layout vertical fit">
             <div>
                 <img id="heroImage" src="[[data.thumb]]" alt="">
-                <paper-icon-button id="closeBtn" icon="icons:close"  on-tap="closeViewer"></paper-icon-button>
+                <paper-icon-button id="closeBtn" icon="icons:close"  on-tap="_handleTapAction" action-type="close-viewer"></paper-icon-button>
             </div>
             <div>
+                <button on-tap="__handleTapAction" action-type="open-reader">完整文章</button>
                 <p>[[data.text]]</p>
             </div>
         </div>
@@ -115,8 +116,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     }
 
                 },
-                closeViewer: function() {
-                    this.fire('close-page');
+                _handleTapAction: function (e) {
+                    var target = e.currentTarget;
+                    var action = target.getAttribute('action-type');
+                    var data = {};
+                    var type = '';
+
+                    switch (action) {
+                        case 'open-reader':
+
+                            break;
+                        case 'close-viewer':
+                            this.fire('close-page');
+                            break;
+                    }
                 },
                 _onElementLoad: function () {
                     console.log(' ==== no images ====')

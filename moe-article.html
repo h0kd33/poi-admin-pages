@@ -300,7 +300,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </div>
                 </template>
                 <!-- Popup Elements -->
-                <iron-dropdown id="responseMenu" horizontal-align="right" vertical-align="top">
+                <iron-dropdown id="responseMenu" horizontal-align="right">
                     <paper-menu class="dropdown-content">
                         <paper-item on-tap="_handlePopupAction" action-type="open-editor">編輯</paper-item>
                         <paper-item>刪除</paper-item>
@@ -360,17 +360,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 _handlePopupAction: function (e) {
                     var target = e.currentTarget;
                     var action = target.getAttribute('action-type');
+                    var index = this.$.list.indexForElement(target);
                     var data = {};
                     var type = '';
 
                     switch (action) {
                         case 'open-reader':
                             // Fire Open Reader
-                            this.fire('open-article-reader', {'item': e.model.data});
+                            this.fire('open-article-reader', {
+                                'data': this.data
+                            });
                             break;
                         case 'open-editor':
                             this.fire('open-article-editor', {
-                                'data': this._actionData.data
+                                'data': this._actionData.data,
+                                'type': this._actionData.type,
                             });
                             break;
                         case 'open-article-menu':
@@ -385,8 +389,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             // TODO: 現在暫時先用相對位置，要找個 find element in event.path 方法 ex: _.find('.response', e.path );
                             // 設定 menu 位置
                             var offsetTarget = target.offsetParent.offsetParent; // should be .response
-                            menu.verticalOffset = offsetTarget.offsetTop;
-
+                            menu.positionTarget =  offsetTarget;
                             menu.open();
                             break;
                     }
@@ -396,17 +399,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         target: target,
                         action: action,
                         data: data,
-                        index: this.$.list.indexForElement(target),
+                        index: index,
                         type: type
                     };
                 },
                 onAlways: function (instance) {
-                    this._onElementLoad();
+                    this._onLoad();
                     this.async(function () {
                         //console.log('★★★all images are loaded★★★');
                     }, 1);
                 },
-                _onElementLoad: function (e) {
+                _onLoad: function (e) {
                     // All Elements are Load complete
                     this.set('hidden', false);
                     this.async(function () {
@@ -423,7 +426,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         var thumbs = this.querySelector('.thumb');
                         // 沒有圖就直接顯示
                         if (!thumbs) {
-                            this._onElementLoad();
+                            this._onLoad();
                         }
                         var imgLoad = imagesLoaded(thumbs);
                         imgLoad.once('always', this.onAlways.bind(this));
